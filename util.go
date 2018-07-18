@@ -20,19 +20,22 @@ import (
 
 // Set represents a data set of image-label pairs held in memory
 type Set struct {
-	NRow   int
-	NCol   int
-	Images []RawImage
-	Labels []Label
+	NRow            int
+	NCol            int
+	Images          []RawImage
+	ImagesFloat     [][]float64
+	ImagesFloatNorm [][]float64
+	Labels          []Label
+	LabelsOneHot    [][]float64
 }
 
 // ReadSet reads a set from the images file iname and the corresponding labels file lname
 func ReadSet(iname, lname string) (set *Set, err error) {
 	set = &Set{}
-	if set.NRow, set.NCol, set.Images, err = ReadImageFile(iname); err != nil {
+	if set.NRow, set.NCol, set.Images, set.ImagesFloat, set.ImagesFloatNorm, err = ReadImageFile(iname); err != nil {
 		return nil, err
 	}
-	if set.Labels, err = ReadLabelFile(lname); err != nil {
+	if set.Labels, set.LabelsOneHot, err = ReadLabelFile(lname); err != nil {
 		return nil, err
 	}
 	return
@@ -66,7 +69,7 @@ func (sw *Sweeper) Next() (image RawImage, label Label, present bool) {
 
 // Sweep creates a new sweep iterator over the data set
 func (s *Set) Sweep() *Sweeper {
-	return &Sweeper{set: s,i:-1}
+	return &Sweeper{set: s, i: -1}
 }
 
 // Load reads both the training and the testing MNIST data sets, given
